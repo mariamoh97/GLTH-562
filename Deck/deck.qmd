@@ -24,3 +24,7 @@ library(readr)
 df <- read_csv(here::here("data", "Testing.csv"))
 mean(df$x)
 ```
+
+```{r}
+library(refugees)
+```
