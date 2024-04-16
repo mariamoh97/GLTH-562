@@ -144,14 +144,21 @@ fd_last_ten_years
                                         
                                         
 ```
+```{r}
+# Loading required packages
+
+
+
+
+```
 
 
 ## Which Nations Do Displaced People Belong To? {.smaller background-color="#EF4A60"}
 
 ```{r}
 
-# Data URL
-df_url <- read_csv("https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/bubble_map.csv")
+
+# Load data
 
 country_data <- refugees::population %>%
                 filter(year >= 2012 & year <= 2022) %>%
@@ -160,54 +167,105 @@ country_data <- refugees::population %>%
                           total_asylum = sum(asylum_seekers),
                           total_idps = sum(idps)) %>%
                 ungroup()
-# country_data
-loc_data <- country_data %>%
-            left_join(df_url, c("coo_iso" = "iso3")) %>%
-            select(-gis_name, -ref)
 
-top10_refugees <- loc_data %>%
-                  arrange(desc(total_refugees)) %>%
-                  drop_na(lon)
-# print(head(top10_refugees, 10))
-
-top10_asylum <- loc_data %>% 
-                arrange(desc(total_asylum)) %>%
-                drop_na(lon)
-# print(head(top10_asylum, 10))
-
-top10_idps <- loc_data %>%
-              arrange(desc(total_idps)) %>%
-              drop_na(lon)
-# print(head(top10_idps, 10))
-            
-
+country_data
 poly_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_polygons_simplified.json"
 line_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_lines_simplified.json"
 
-# Read and transform data for refugees
-df_ref <- top10_refugees %>% 
-  st_as_sf(coords = c("lon", "lat"),
-           crs = 4326)
+# Add CRS to poly and join values from csv
+poly_refugees <- read_sf(poly_url) |> 
+  st_set_crs(4326) |> 
+  left_join(country_data, by = c("color_code" = "coo_iso")) |> 
+  mutate(legend = case_when(
+    total_refugees < 1e4 ~ "<10k",
+    total_refugees < 1e5 ~ "10k-100k",
+    total_refugees < 1e6 ~ "100k-1M",
+    is.na(total_refugees) ~ NA_character_,
+    TRUE ~ ">1M"
+  )) |> 
+  mutate(legend = as_factor(legend) |> 
+           fct_relevel("<10k", "10k-100k", "100k-1M", ">1M"))
 
-poly <- read_sf(poly_url) %>%
-  st_set_crs(4326)
+poly_idps <- read_sf(poly_url) |> 
+  st_set_crs(4326) |> 
+  left_join(country_data, by = c("color_code" = "coo_iso")) |> 
+  mutate(legend = case_when(
+    total_idps < 1e4 ~ "<10k",
+    total_idps < 1e5 ~ "10k-100k",
+    total_idps < 1e6 ~ "100k-1M",
+    is.na(total_idps) ~ NA_character_,
+    TRUE ~ ">1M"
+  )) |> 
+  mutate(legend = as_factor(legend) |> 
+           fct_relevel("<10k", "10k-100k", "100k-1M", ">1M"))
+  
 
-line <- read_sf(line_url) %>%
+# Sort line type
+line <- read_sf(line_url) |>
   mutate(
-    type = as_factor(type) %>%
+    type = as_factor(type) |>
       fct_relevel("solid", "dashed", "dotted", "dashed-dot")
-  ) %>%
+  ) |> 
   st_set_crs(4326)
 
-# Read and transform data for asylum seekers
-df_asy <- top10_asylum %>% 
-  st_as_sf(coords = c("lon", "lat"),
-           crs = 4326)
-
-# Read and transform data for internally displaced persons
-df_idp <- top10_idps %>% 
-  st_as_sf(coords = c("lon", "lat"),
-           crs = 4326)
+# # Data URL
+# df_url <- read_csv("https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/bubble_map.csv")
+# 
+# country_data <- refugees::population %>%
+#                 filter(year >= 2012 & year <= 2022) %>%
+#                 group_by(coo_name, coo_iso) %>%
+#                 summarise(total_refugees = sum(refugees),
+#                           total_asylum = sum(asylum_seekers),
+#                           total_idps = sum(idps)) %>%
+#                 ungroup()
+# # country_data
+# loc_data <- country_data %>%
+#             left_join(df_url, c("coo_iso" = "iso3")) %>%
+#             select(-gis_name, -ref)
+# 
+# top10_refugees <- loc_data %>%
+#                   arrange(desc(total_refugees)) %>%
+#                   drop_na(lon)
+# # print(head(top10_refugees, 10))
+# 
+# top10_asylum <- loc_data %>% 
+#                 arrange(desc(total_asylum)) %>%
+#                 drop_na(lon)
+# # print(head(top10_asylum, 10))
+# 
+# top10_idps <- loc_data %>%
+#               arrange(desc(total_idps)) %>%
+#               drop_na(lon)
+# # print(head(top10_idps, 10))
+#             
+# 
+# poly_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_polygons_simplified.json"
+# line_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_lines_simplified.json"
+# 
+# # Read and transform data for refugees
+# df_ref <- top10_refugees %>% 
+#   st_as_sf(coords = c("lon", "lat"),
+#            crs = 4326)
+# 
+# poly <- read_sf(poly_url) %>%
+#   st_set_crs(4326)
+# 
+# line <- read_sf(line_url) %>%
+#   mutate(
+#     type = as_factor(type) %>%
+#       fct_relevel("solid", "dashed", "dotted", "dashed-dot")
+#   ) %>%
+#   st_set_crs(4326)
+# 
+# # Read and transform data for asylum seekers
+# df_asy <- top10_asylum %>% 
+#   st_as_sf(coords = c("lon", "lat"),
+#            crs = 4326)
+# 
+# # Read and transform data for internally displaced persons
+# df_idp <- top10_idps %>% 
+#   st_as_sf(coords = c("lon", "lat"),
+#            crs = 4326)
 
 
 
@@ -219,33 +277,53 @@ df_idp <- top10_idps %>%
 
 ```{r}
 
+
+# Plot
 ggplot() +
-  geom_sf(data = poly,
-          fill = unhcr_pal(n = 5, "pal_grey")[2],
+  geom_sf(data = poly_refugees,
+          aes(fill = legend),
           color = "transparent") +
   geom_sf(data = line,
           aes(linetype = type),
           color = "white",
           linewidth = .25,
           show.legend = FALSE) +
-  geom_sf(data = df_ref,
-          aes(size = total_refugees),
-          shape = 21,
-          fill = unhcr_pal(n = 1, "pal_blue"),
-          color = unhcr_pal(n = 5, "pal_blue")[5],
-          alpha = 0.3) +
+  coord_sf(crs = st_crs('ESRI:54030'),
+           expand = FALSE) +
   scale_linetype_manual(values = c(1, 2, 3, 4)) +
-  scale_size_area(max_size = 12,
-                  labels = scales::label_number(
-                    scale_cut = cut_short_scale()
-                  ),
-                  breaks = c(1e5, 1e6, 5e6)) +
+  scale_fill_unhcr_d(palette = "pal_blue") +
   # labs(
-  #   title = "Global refugee displacement by country of origin | Last Decade",
-  #   caption = "The boundaries and names shown and the designations used on this map do not imply official endorsement or\nacceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
+  #   title = "Global refugee displacement by country of asylum | 2021",
+  #   caption = "The boundaries and names shown and the designations used on this map do not imply official\nendorsement or acceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
   # ) +
-  coord_sf(crs = st_crs('ESRI:54030')) +
   theme_unhcr(void = TRUE)
+# ggplot() +
+#   geom_sf(data = poly,
+#           fill = unhcr_pal(n = 5, "pal_grey")[2],
+#           color = "transparent") +
+#   geom_sf(data = line,
+#           aes(linetype = type),
+#           color = "white",
+#           linewidth = .25,
+#           show.legend = FALSE) +
+#   geom_sf(data = df_ref,
+#           aes(size = total_refugees),
+#           shape = 21,
+#           fill = unhcr_pal(n = 1, "pal_blue"),
+#           color = unhcr_pal(n = 5, "pal_blue")[5],
+#           alpha = 0.3) +
+#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
+#   scale_size_area(max_size = 12,
+#                   labels = scales::label_number(
+#                     scale_cut = cut_short_scale()
+#                   ),
+#                   breaks = c(1e5, 1e6, 5e6)) +
+#   # labs(
+#   #   title = "Global refugee displacement by country of origin | Last Decade",
+#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official endorsement or\nacceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
+#   # ) +
+#   coord_sf(crs = st_crs('ESRI:54030')) +
+#   theme_unhcr(void = TRUE)
 ```
 
 
@@ -286,33 +364,55 @@ ggplot() +
 
 ```{r}
 
+
+
+# Plot
 ggplot() +
-  geom_sf(data = poly,
-          fill = unhcr_pal(n = 5, "pal_grey")[2],
+  geom_sf(data = poly_idps,
+          aes(fill = legend),
           color = "transparent") +
   geom_sf(data = line,
           aes(linetype = type),
           color = "white",
           linewidth = .25,
           show.legend = FALSE) +
-  geom_sf(data = df_idp,
-          aes(size = total_idps),
-          shape = 21,
-          fill = unhcr_pal(n = 1, "pal_blue"),
-          color = unhcr_pal(n = 5, "pal_blue")[5],
-          alpha = 0.3) +
+  coord_sf(crs = st_crs('ESRI:54030'),
+           expand = FALSE) +
   scale_linetype_manual(values = c(1, 2, 3, 4)) +
-  scale_size_area(max_size = 12,
-                  labels = scales::label_number(
-                    scale_cut = cut_short_scale()
-                  ),
-                  breaks = c(1e5, 1e6, 5e6)) +
+  scale_fill_unhcr_d(palette = "pal_blue") +
   # labs(
-  #   title = "Global refugee displacement by country of origin | Last Decade",
-  #   caption = "The boundaries and names shown and the designations used on this map do not imply official endorsement or\nacceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
+  #   title = "Global refugee displacement by country of asylum | 2021",
+  #   caption = "The boundaries and names shown and the designations used on this map do not imply official\nendorsement or acceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
   # ) +
-  coord_sf(crs = st_crs('ESRI:54030')) +
   theme_unhcr(void = TRUE)
+# 
+# ggplot() +
+#   geom_sf(data = poly,
+#           fill = unhcr_pal(n = 5, "pal_grey")[2],
+#           color = "transparent") +
+#   geom_sf(data = line,
+#           aes(linetype = type),
+#           color = "white",
+#           linewidth = .25,
+#           show.legend = FALSE) +
+#   geom_sf(data = df_idp,
+#           aes(size = total_idps),
+#           shape = 21,
+#           fill = unhcr_pal(n = 1, "pal_blue"),
+#           color = unhcr_pal(n = 5, "pal_blue")[5],
+#           alpha = 0.3) +
+#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
+#   scale_size_area(max_size = 12,
+#                   labels = scales::label_number(
+#                     scale_cut = cut_short_scale()
+#                   ),
+#                   breaks = c(1e5, 1e6, 5e6)) +
+#   # labs(
+#   #   title = "Global refugee displacement by country of origin | Last Decade",
+#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official endorsement or\nacceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
+#   # ) +
+#   coord_sf(crs = st_crs('ESRI:54030')) +
+#   theme_unhcr(void = TRUE)
 ```
 
 :::
