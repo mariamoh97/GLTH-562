@@ -1,0 +1,70 @@
+---
+title: "Relational Data"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(feb2)
+```
+
+## How many prognosticators have no prediction data?
+
+Return a number (in a tibble is fine)
+
+```{r}
+n <- anti_join(prognosticators, predictions) %>%
+    count()
+# anti_join(prognosticators, predictions)
+# can also use nrow
+
+```
+
+There are `r n` prognosticators with no prediction data.
+
+## What are their names?
+
+```{r}
+no_pred_names <- anti_join(prognosticators, predictions) %>% pull(prognosticator_name)
+# no_pred_names <- c(no_pred_names)
+no_pred_names <-  paste(no_pred_names, collapse=", ")
+print(no_pred_names)
+
+```
+
+Their names are `r no_pred_names`
+
+Return a vector of names
+
+## Which prognosticator's city coordinates are closest to a GHCND weather station?
+
+Punxsutawney Phil or Jimmy the Groundhog?
+
+```{r}
+close_city <- prognosticators %>% 
+              filter(prognosticator_name %in% c("Punxsutawney Phil", "Jimmy the Groundhog")) %>%
+              left_join(weather_stations_ghcnd, join_by(prognosticator_city)) %>%
+              group_by(prognosticator_name) %>% 
+              summarise(nearest = min(distance)) %>%
+            
+close_city
+
+
+```
+
+## Create a plot of prediction accuracy over time by `prognosticator_status`
+
+-   exclude human mascots
+-   limit to years with at least 5 per year per level of `prognosticator_status` (except human mascots)
+-   create a dataset with only `prognosticator_name`, `year`, `predict_early_spring`, `prognosticator_city`, `prognosticator_status`, and `class`
+-   facet plot by `prognosticator_status`
+
+
+```{r}
+dataset_prog <- prognosticators %>% 
+                filter(!prognosticator_type %in% c("Human Mascot"))
+
+
+
+```

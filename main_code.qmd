@@ -4,15 +4,23 @@ format: html
 editor: visual
 ---
 
-https://www.unhcr.org/sites/default/files/2023-06/global-trends-report-2022.pdf
-https://dataviz.unhcr.org/tools/r/
-
+https://www.unhcr.org/sites/default/files/2023-06/global-trends-report-2022.pdf https://dataviz.unhcr.org/tools/r/
 
 ```{r}
 library(tidyverse)
 library(refugees)
 library(tidymodels)
 
+asylum_decisions_new <- asylum_decisions %>% 
+                        mutate(acc_rate = (dec_recognized + dec_other) / dec_total) %>%
+                        filter(acc_rate >= 0 & acc_rate <= 1)
+ 
+regress_asylum = lm(acc_rate~coo_iso + coa_iso + procedure_type + dec_level + dec_pc, data = asylum_decisions_new)
+summary(regress_asylum)
+
+```
+
+```{r}
 set.seed(100) # Important!
 
 train_data
