@@ -13,6 +13,7 @@ library(tidyverse)
 library(refugees)
 library(shiny)
 library(ggplot2)
+library(unhcrthemes)
 ```
 
 # Exploratory Data
@@ -22,58 +23,55 @@ library(ggplot2)
 
 # Demographics
 
-{.sidebar}
 
-```{r}
-
-checkboxGroupInput("demographics", label=h3("Pick gender"),
-                   choices=list("Creature"="Creature", "Human Mascot"="Human Mascot", "Inanimate"="Inanimate" ), selected="Creature")
-
-sliderInput("years", "Minimum prediction years:", min=1, max=10, value=5)
-
-```
-## Column
-```{r}
-
-
-```
 
 # Asylum Application Acceptance Rates
 ```{r}
-approval <- asylum_decisions %>% 
-   mutate(approval_rate=
-         dec_recognized+dec_other/dec_total) %>%
-    group_by(year) 
+# Data Wrangling
 
-
-# exclude closed? ask aarushi
-
-
-```
-## Column
-```{r}
-
-sliderInput("year", "Minimum prediction years:", min=1, max=10, value=5)
-```
-## Column
-```{r}
-
-```
-
-
-```{r}
-sliderInput("bins", "Number of bins:", 
-            min = 1, max = 50, value = 30)
-plotOutput("distPlot")
-```
-
-```{r}
 #| context: server
-output$distPlot <- renderPlot({
-   x <- faithful[, 2]  # Old Faithful Geyser data
-   bins <- seq(min(x), max(x), length.out = input$bins + 1)
-   hist(x, breaks = bins, col = 'darkgray', border = 'white',
-        xlab = 'Waiting time to next eruption (in mins)',
-        main = 'Histogram of waiting times')
+#| include: false
+
+countries_2 <-  countries %>% rename(coo_name = name)
+
+approval <- reactive({asylum_decisions %>%
+   mutate(approved=
+         dec_recognized+dec_other) %>%
+    filter(year=c("2013","2014","2015","2016","2017","2018","2019","2020","2021","2022"))
+    left_join(countries_2, join_by(coo_name)) %>%
+  group_by(year,input$unhcr_region)
+
+  #  # filter(unhcr_region!="NA") %>%
+
+
 })
+
+output$data <- renderTable({approval})
+
+output$plot <- renderPlot({
+    p <- ggplot(approval,
+       aes(x = year,
+           y = approved,
+           fill = approved)) +
+        geom_col() +
+        theme_unhcr()
+})
+
+
+
+
+
+
 ```
+
+## {.sidebar}
+```{r}
+checkboxGroupInput("unhcr_region", label=h3("Choose UNHCR Region"),
+                   choices=list("Asia and the Pacific"="Asia and the Pacific", "Europe"="Europe", "Southern Africa"="Southern Africa", "The Americas"="The Americas","Middle East and North Africa"="Middle East and North Africa", "East and Horn of Africa"="East and Horn of Africa", "West and Central Africa"="West and Central Africa" ),
+selected="Asia and the Pacific")
+
+
+```
+
+
+

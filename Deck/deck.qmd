@@ -16,7 +16,6 @@ format:
 editor: visual
 ---
 
-
 ```{r}
 library(tidymodels)
 library(refugees)
@@ -36,20 +35,20 @@ library(viridis)
 library(DT)
 library(gganimate)
 ```
+
 # Exploring the Data {background-color="#0072BC" background-size="contain" background-opacity="0.3"}
 
 ## 2022 has been one of the worst years {background-color="#EF4A60"}
 
-::: {.incremental}
+::: incremental
+-   In 2022, millions were forcibly displaced by persecution, conflict, violence, human rights violations and events seriously disturbing public order
 
-- In 2022, millions were forcibly displaced by persecution, conflict, violence, human rights violations and events seriously disturbing public order
-- The numbers grew by 21% by the end of the year
+-   The numbers grew by 21% by the end of the year
 
-- More than 1 in 74 people worldwide remained forcibly displaced as a result
-- Almost 90 per cent of them in low- and middle-income countries
+-   More than 1 in 74 people worldwide remained forcibly displaced as a result
 
+-   Almost 90 per cent of them in low- and middle-income countries
 :::
-
 
 ## Top 10 Countries of Origin for Refugees {background-color="#EF4A60"}
 
@@ -80,12 +79,11 @@ ref_coo_10
 
 ```
 
-
 ## Important Definitions {.smaller background-color="#EF4A60"}
-:::: {.columns}
 
+::: columns
 ::: {.column width="25%"}
-**Refugees** include individuals granted complementary forms of protection, and those enjoying temporary protection. 
+**Refugees** include individuals granted complementary forms of protection, and those enjoying temporary protection.
 :::
 
 ::: {.column width="25%"}
@@ -99,8 +97,7 @@ ref_coo_10
 ::: {.column width="25%"}
 **Internally displaced persons** are persons who have been forced or obliged to flee or to leave their homes , in particular as a result of, or in order to avoid the effects of armed conflict, situations of generalized violence, violations of human rights or natural or human-made disasters, and who have not crossed an internationally recognized State border.
 :::
-
-::::
+:::
 
 ## In the last decade, 62.2 million refugees were added {background-color="#EF4A60"}
 
@@ -144,6 +141,7 @@ fd_last_ten_years
                                         
                                         
 ```
+
 ```{r}
 # Loading required packages
 
@@ -151,7 +149,6 @@ fd_last_ten_years
 
 
 ```
-
 
 ## Which Nations Do Displaced People Belong To? {.smaller background-color="#EF4A60"}
 
@@ -271,7 +268,6 @@ line <- read_sf(line_url) |>
 
 ```
 
-
 ::: panel-tabset
 ### Refugees
 
@@ -326,8 +322,6 @@ ggplot() +
 #   theme_unhcr(void = TRUE)
 ```
 
-
-
 ```{r}
 ### Asylum Seekers
 # ggplot() +
@@ -358,7 +352,6 @@ ggplot() +
 #   coord_sf(crs = st_crs('ESRI:54030')) +
 #   theme_unhcr(void = TRUE)
 ```
-
 
 ### Internally Displaced Persons
 
@@ -414,11 +407,9 @@ ggplot() +
 #   coord_sf(crs = st_crs('ESRI:54030')) +
 #   theme_unhcr(void = TRUE)
 ```
-
 :::
 
-## Overall, Which Regions Produce Refugees the Most?
-
+## Refugee Population Across UNHCR Regions
 
 ```{r}
 df <- read_csv("https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/correlation/heatmap.csv")
@@ -470,8 +461,6 @@ ggplot(
   )
 
 ```
-
-
 
 ```{r}
 
@@ -549,12 +538,10 @@ ggplot(
 
 ```
 
-
-
-
 # Applications {background-color="#0072BC" background-opacity="0.3"}
 
-## Which Countries Accept Most Applications {background-color="#EF4A60"}
+## Which Countries Accept Most Asylum Applications {background-color="#EF4A60"}
+
 ```{r}
 asy_dec <- asylum_decisions %>%
             filter(dec_recognized + dec_other + dec_rejected + dec_closed == dec_total) %>%
@@ -598,7 +585,8 @@ app_map <- ggplotly(sliding_map) %>% animation_slider(currentvalue = list(prefix
 app_map
 
 ```
-## Most Common Types of Applications {background-color="#EF4A60"}
+
+## Most Common Types of Applications  {background-color="#EF4A60"}
 
 ```{r}
 
@@ -613,7 +601,7 @@ filter_years$year <- as.factor(filter_years$year)
 
 ggplot(filter_years, aes(x = year, fill = procedure_type_2)) +
   geom_bar() +
-  labs(title = "Procedure Types | 2013-2022",
+  labs(title = "Asylum Application Procedure Type | 2013-2022",
        x = "Year",
        y= NULL,
        fill = "Procedure Type") +
@@ -630,44 +618,43 @@ ggplot(filter_years, aes(x = year, fill = procedure_type_2)) +
 
 ### Random Forest Model
 
-- Dependent Variable: Acceptance Rate
-- Independent Variables: ISO Codes for Countries of Origin and Asylum, Procedure Type, Decision Level, Applicant Type
+-   Dependent Variable: Acceptance Rate
+-   Independent Variables: ISO Codes for Countries of Origin and Asylum, Procedure Type, Decision Level, Applicant Type
 
-```{r}
-  options(scipen = 999)
-  library(tidyverse)
-  library(modeldata)
-  library(tidymodels)
-
-
-  asy_dec_model <- asylum_decisions %>%
-            filter(dec_recognized + dec_other + dec_rejected + dec_closed == dec_total) %>%
-            mutate(acceptance_rate_pct = (dec_recognized + dec_other)/dec_total) 
-
-  forest_mod <- 
-  rand_forest(mtry = 3,
-              trees = 500,
-              min_n = 4) %>% 
-  set_engine(engine = "randomForest") %>% 
-  set_mode("regression")
-  forest_mod
-  
-  set.seed(100) # Important!
-
-  asylum_split  <- initial_split(asy_dec)
-  asylum_train  <- training(asylum_split)
-  asylum_test   <- testing(asylum_split)
-  
-  rf_reg_fit <- forest_mod %>% 
-                fit(acceptance_rate_pct ~ coo_iso + coa_iso + procedure_type + dec_level + dec_pc, 
-                                   data = asylum_train)
-  rf_reg_fit
-  
+```{# {r}
+#   options(scipen = 999)
+#   library(tidyverse)
+#   library(modeldata)
+#   library(tidymodels)
+# 
+# 
+#   asy_dec_model <- asylum_decisions %>%
+#             filter(dec_recognized + dec_other + dec_rejected + dec_closed == dec_total) %>%
+#             mutate(acceptance_rate_pct = (dec_recognized + dec_other)/dec_total) 
+# 
+#   forest_mod <- 
+#   rand_forest(mtry = 3,
+#               trees = 500,
+#               min_n = 4) %>% 
+#   set_engine(engine = "randomForest") %>% 
+#   set_mode("regression")
+#   forest_mod
+#   
+#   set.seed(100) # Important!
+# 
+#   asylum_split  <- initial_split(asy_dec)
+#   asylum_train  <- training(asylum_split)
+#   asylum_test   <- testing(asylum_split)
+#   
+#   rf_reg_fit <- forest_mod %>% 
+#                 fit(acceptance_rate_pct ~ coo_iso + coa_iso + procedure_type + dec_level + dec_pc, 
+#                                    data = asylum_train)
+#   rf_reg_fit
+#   
 ```
 
-
-
 ## Model results in terms of precision and recall
-## Run 2 simulations
-## Try to find weights given to each parameter
 
+## Run 2 simulations
+
+## Try to find weights given to each parameter
