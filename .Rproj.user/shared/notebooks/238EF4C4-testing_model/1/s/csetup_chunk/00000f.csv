@@ -1,0 +1,8 @@
+"0","knitr::opts_chunk$set(echo = TRUE)"
+"0",""
+"0","options(scipen = 999)"
+"0","library(tidyverse)"
+"0","library(modeldata)"
+"0","library(tidymodels)"
+"0","library(refugees)"
+"0",""

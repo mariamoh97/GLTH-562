@@ -165,7 +165,7 @@ country_data <- refugees::population %>%
                           total_idps = sum(idps)) %>%
                 ungroup()
 
-country_data
+# country_data
 poly_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_polygons_simplified.json"
 line_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_lines_simplified.json"
 
@@ -409,7 +409,7 @@ ggplot() +
 ```
 :::
 
-## Refugee Population Across UNHCR Regions
+## Refugee Population Across UNHCR Regions {background-color="#EF4A60"}
 
 ```{r}
 df <- read_csv("https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/correlation/heatmap.csv")
@@ -586,7 +586,7 @@ app_map
 
 ```
 
-## Most Common Types of Applications  {background-color="#EF4A60"}
+## Most Common Types of Applications {background-color="#EF4A60"}
 
 ```{r}
 
@@ -612,7 +612,7 @@ ggplot(filter_years, aes(x = year, fill = procedure_type_2)) +
 
 # Predicting Acceptance Rates {background-color="#0072BC" background-opacity="0.3"}
 
-## Model Used and Design- Dependent and Independent Vars
+## Model Used and Design- Dependent and Independent Vars {background-color="#EF4A60"}
 
 ::: panel-tabset
 
@@ -620,41 +620,14 @@ ggplot(filter_years, aes(x = year, fill = procedure_type_2)) +
 
 -   Dependent Variable: Acceptance Rate
 -   Independent Variables: ISO Codes for Countries of Origin and Asylum, Procedure Type, Decision Level, Applicant Type
+-   Random forest because of categorical input
 
-```{# {r}
-#   options(scipen = 999)
-#   library(tidyverse)
-#   library(modeldata)
-#   library(tidymodels)
-# 
-# 
-#   asy_dec_model <- asylum_decisions %>%
-#             filter(dec_recognized + dec_other + dec_rejected + dec_closed == dec_total) %>%
-#             mutate(acceptance_rate_pct = (dec_recognized + dec_other)/dec_total) 
-# 
-#   forest_mod <- 
-#   rand_forest(mtry = 3,
-#               trees = 500,
-#               min_n = 4) %>% 
-#   set_engine(engine = "randomForest") %>% 
-#   set_mode("regression")
-#   forest_mod
-#   
-#   set.seed(100) # Important!
-# 
-#   asylum_split  <- initial_split(asy_dec)
-#   asylum_train  <- training(asylum_split)
-#   asylum_test   <- testing(asylum_split)
-#   
-#   rf_reg_fit <- forest_mod %>% 
-#                 fit(acceptance_rate_pct ~ coo_iso + coa_iso + procedure_type + dec_level + dec_pc, 
-#                                    data = asylum_train)
-#   rf_reg_fit
-#   
-```
+### RMSE Value
+- 28.1370495
+- Too high for useful predictions
+- Model requires better data cleaning
 
-## Model results in terms of precision and recall
+:::
 
-## Run 2 simulations
 
-## Try to find weights given to each parameter
+# THANK YOU! {background-color="#0072BC" background-opacity="0.3"}
