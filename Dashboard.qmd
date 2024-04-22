@@ -28,6 +28,7 @@ library(plotly)
 library(viridis)
 library(DT)
 library(gganimate)
+library(plotly)
 ```
 
 # Country Data
@@ -111,33 +112,105 @@ line <- read_sf(line_url) |>
   ) |> 
   st_set_crs(4326)
 ```
-# Refugee & Displaced Population 
+# Refugee & Displaced Population by Region
 
 ## Refugees
 ```{r}
-ggplot() +
+# ggplot() +
+#   geom_sf(data = poly_refugees,
+#           aes(fill = legend),
+#           color = "transparent") +
+#   geom_sf(data = line,
+#           aes(linetype = type),
+#           color = "white",
+#           linewidth = .25,
+#           show.legend = FALSE) +
+#   coord_sf(crs = st_crs('ESRI:54030'),
+#            expand = FALSE) +
+#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
+#   scale_fill_unhcr_d(palette = "pal_blue") +
+#   labs(
+#     title = "Global refugee displacement by country of origin| 2012-2022")+
+#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official\nendorsement or acceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
+#   # ) +
+#   theme_unhcr(void = TRUE)
+
+
+
+p <- ggplot() +
   geom_sf(data = poly_refugees,
-          aes(fill = legend),
+          aes(fill = legend, text = paste("Country: ", coo_name, "<br>Refugees: ", total_refugees)),
           color = "transparent") +
   geom_sf(data = line,
-          aes(linetype = type),
+          aes(),
+          linetype = "solid", # Setting linetype outside aes() with a fixed value
           color = "white",
-          linewidth = .25,
-          show.legend = FALSE) +
+          linewidth = .25) + # Removing show.legend = FALSE
   coord_sf(crs = st_crs('ESRI:54030'),
            expand = FALSE) +
-  scale_linetype_manual(values = c(1, 2, 3, 4)) +
   scale_fill_unhcr_d(palette = "pal_blue") +
   labs(
-    title = "Global refugee displacement by country of origin| 2021")+
-  #   caption = "The boundaries and names shown and the designations used on this map do not imply official\nendorsement or acceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
-  # ) +
-  theme_unhcr(void = TRUE)
+    title = "Global refugee displacement by country of origin| 2012-2022"
+  ) +
+  theme_void() +
+  guides(fill = guide_legend(title = NULL)) 
+
+# Convert ggplot object to plotly
+p <- ggplotly(p, tooltip = "text")
+
+p
+
 
 ```
+## Internally Displaced Persons
+```{r}
+# ggplot() +
+#   geom_sf(data = poly_idps,
+#           aes(fill = legend),
+#           color = "transparent") +
+#   geom_sf(data = line,
+#           aes(linetype = type),
+#           color = "white",
+#           linewidth = .25,
+#           show.legend = FALSE) +
+#   coord_sf(crs = st_crs('ESRI:54030'),
+#            expand = FALSE) +
+#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
+#   scale_fill_unhcr_d(palette = "pal_blue") +
+#   labs(
+#   title = "Global internally displaced persons by country of origin| 2012-2022") +
+#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official\nendorsement or acceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
+#   # ) +
+#   theme_unhcr(void = TRUE)
 
+p <- ggplot() +
+  geom_sf(data = poly_refugees,
+          aes(fill = legend, text = paste("Country: ", coo_name, "<br>Internally Displaced: ", total_idps)),
+          color = "transparent") +
+  geom_sf(data = line,
+          aes(),
+          linetype = "solid", # Setting linetype outside aes() with a fixed value
+          color = "white",
+          linewidth = .25) + # Removing show.legend = FALSE
+  coord_sf(crs = st_crs('ESRI:54030'),
+           expand = FALSE) +
+  scale_fill_unhcr_d(palette = "pal_blue") +
+  labs(
+    title = "Global refugee displacement by country of origin| 2012-2022"
+  ) +
+  theme_void() +
+  guides(fill = guide_legend(title = NULL)) 
 
-## Global forcibly displaced population during last ten years
+# Convert ggplot object to plotly
+p1 <- ggplotly(p, tooltip = "text")
+
+p1
+```
+
+# Refugee Population
+
+## Refugee Population in the last 10 years
+
 ```{r}
 fd_last_ten_years <- refugees::population |>
   filter(year >= 2012 & year <= 2022) |>
@@ -162,7 +235,9 @@ fd_last_ten_years <- refugees::population |>
   ggplot() +
   geom_area(aes(x = year, y = total, fill = population_type)) +
   scale_fill_unhcr_d(palette = "pal_unhcr") +
-  labs(y = "Number of people", caption = "Source: UNHCR Refugee Data Finder") +
+  labs(y = "Number of people", 
+       caption = "Source: UNHCR Refugee Data Finder",
+       title = "Refugee Population in the last 10 years") +
   scale_x_continuous(breaks = pretty_breaks(n = 10)) +
   scale_y_continuous(expand = expansion(c(0, 0.1)), breaks= pretty_breaks(n = 5), labels = label_number(scale_cut = cut_long_scale())) +  
   theme_unhcr(font_size = 15,
@@ -309,10 +384,7 @@ approval_data <- reactive({
     filter(year %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022")) %>% 
     left_join(select(filter(countries_2, unhcr_region %in% input$region), coo_name, unhcr_region), by = "coo_name") %>%
     filter(unhcr_region!="NA")
-    # group_by(year, unhcr_region, approved) %>%
-    # count() %>%
-    # ungroup() %>%
-    # complete(year, unhcr_region, approved, fill = list(n = 0)) 
+   
 })
 
 output$plot <- renderPlot({
@@ -323,8 +395,7 @@ output$plot <- renderPlot({
     theme_unhcr() +
      scale_y_continuous(labels = label_number()) +
         theme(axis.text = element_text(size = 12),
-          axis.title = element_text(size=16)) +
-    coord_flip()
+          axis.title = element_text(size=16))
 }) 
 
 ```
@@ -393,7 +464,7 @@ output$plot_1 <- renderPlot({
 
 ```
 
-# Demographics
+# Gender
 ```{r}
 plotOutput('plot_1')
 
@@ -411,15 +482,18 @@ selectizeInput("country", "Choose Country of Origin:",
                )
 )
 
-
 sliderInput("year", "Select Year Range",
           min = 2013, max = 2022, value = c(2013, 2022), step = 1)
 
 
-
 ```
 
+# Asylum Acceptance Prediction Model
 
+```{r}
+
+
+```
 
 ```{r}
 # demographics_data <- demographics %>%
