@@ -31,9 +31,7 @@ library(gganimate)
 library(plotly)
 ```
 
-# Country Data
-
-## Top 10 Countries of Origin for Refugees
+# Top 10 Countries of Origin for Refugees
 
 ```{r}
 ref_coo_10 <- refugees::population |>
@@ -112,29 +110,10 @@ line <- read_sf(line_url) |>
   ) |> 
   st_set_crs(4326)
 ```
-# Refugee & Displaced Population by Region
+# Displacement by Country of Origin
 
 ## Refugees
 ```{r}
-# ggplot() +
-#   geom_sf(data = poly_refugees,
-#           aes(fill = legend),
-#           color = "transparent") +
-#   geom_sf(data = line,
-#           aes(linetype = type),
-#           color = "white",
-#           linewidth = .25,
-#           show.legend = FALSE) +
-#   coord_sf(crs = st_crs('ESRI:54030'),
-#            expand = FALSE) +
-#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
-#   scale_fill_unhcr_d(palette = "pal_blue") +
-#   labs(
-#     title = "Global refugee displacement by country of origin| 2012-2022")+
-#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official\nendorsement or acceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
-#   # ) +
-#   theme_unhcr(void = TRUE)
-
 
 
 p <- ggplot() +
@@ -143,9 +122,9 @@ p <- ggplot() +
           color = "transparent") +
   geom_sf(data = line,
           aes(),
-          linetype = "solid", # Setting linetype outside aes() with a fixed value
+          linetype = "solid", 
           color = "white",
-          linewidth = .25) + # Removing show.legend = FALSE
+          linewidth = .25) + 
   coord_sf(crs = st_crs('ESRI:54030'),
            expand = FALSE) +
   scale_fill_unhcr_d(palette = "pal_blue") +
@@ -164,24 +143,6 @@ p
 ```
 ## Internally Displaced Persons
 ```{r}
-# ggplot() +
-#   geom_sf(data = poly_idps,
-#           aes(fill = legend),
-#           color = "transparent") +
-#   geom_sf(data = line,
-#           aes(linetype = type),
-#           color = "white",
-#           linewidth = .25,
-#           show.legend = FALSE) +
-#   coord_sf(crs = st_crs('ESRI:54030'),
-#            expand = FALSE) +
-#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
-#   scale_fill_unhcr_d(palette = "pal_blue") +
-#   labs(
-#   title = "Global internally displaced persons by country of origin| 2012-2022") +
-#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official\nendorsement or acceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
-#   # ) +
-#   theme_unhcr(void = TRUE)
 
 p <- ggplot() +
   geom_sf(data = poly_refugees,
@@ -189,14 +150,14 @@ p <- ggplot() +
           color = "transparent") +
   geom_sf(data = line,
           aes(),
-          linetype = "solid", # Setting linetype outside aes() with a fixed value
+          linetype = "solid", 
           color = "white",
-          linewidth = .25) + # Removing show.legend = FALSE
+          linewidth = .25) + 
   coord_sf(crs = st_crs('ESRI:54030'),
            expand = FALSE) +
   scale_fill_unhcr_d(palette = "pal_blue") +
   labs(
-    title = "Global refugee displacement by country of origin| 2012-2022"
+    title = "Global internal displacement  by country of origin| 2012-2022"
   ) +
   theme_void() +
   guides(fill = guide_legend(title = NULL)) 
@@ -372,58 +333,6 @@ app_map <- ggplotly(sliding_map) %>% animation_slider(currentvalue = list(prefix
 app_map
 ```
 
-```{r}
-#| context: server
-
-
-approval_data <- reactive({
-  countries_2 <- countries %>% rename(coo_name = name)
-  asylum_decisions %>%
-    mutate(year = factor(year)) %>%
-    mutate(approved = dec_recognized + dec_other) %>%
-    filter(year %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022")) %>% 
-    left_join(select(filter(countries_2, unhcr_region %in% input$region), coo_name, unhcr_region), by = "coo_name") %>%
-    filter(unhcr_region!="NA")
-   
-})
-
-output$plot <- renderPlot({
-  ggplot(approval_data(), aes(x = year, y = approved, fill = unhcr_region)) +
-    geom_bar(stat = "identity", position = "stack") +
-    labs(title = "Approved Asylum Decisions by UNHCR Region",
-         x = "Year", y = "Number of Approved Decisions") +
-    theme_unhcr() +
-     scale_y_continuous(labels = label_number()) +
-        theme(axis.text = element_text(size = 12),
-          axis.title = element_text(size=16))
-}) 
-
-```
-
-
-
-# Accepted Asylum Applications
-```{r}
-plotOutput('plot')
-
-```
-
-
-## {.sidebar}
-```{r}
-  checkboxGroupInput("region", label = h3("Choose UNHCR Region"),
-                     choices = list("Asia and the Pacific" = "Asia and the Pacific",
-                                    "Europe" = "Europe",
-                                    "Southern Africa" = "Southern Africa",
-                                    "The Americas" = "The Americas",
-                                    "Middle East and North Africa" = "Middle East and North Africa",
-                                    "East and Horn of Africa" = "East and Horn of Africa",
-                                    "West and Central Africa" = "West and Central Africa"),
-                     selected = "Asia and the Pacific")
-
-
-```
-
 
 ```{r}
 #| context: server
@@ -464,7 +373,7 @@ output$plot_1 <- renderPlot({
 
 ```
 
-# Gender
+# Asylum Applications by Gender
 ```{r}
 plotOutput('plot_1')
 
@@ -488,184 +397,110 @@ sliderInput("year", "Select Year Range",
 
 ```
 
-# Asylum Acceptance Prediction Model
+```{r}
+#| context: server
+
+approval_data <- reactive({
+  countries_2 <- countries %>% rename(coo_name = name)
+  asylum_decisions %>%
+    mutate(year = factor(year)) %>%
+    mutate(approved = dec_recognized + dec_other) %>%
+    filter(year %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022")) %>% 
+    left_join(select(filter(countries_2, unhcr_region %in% input$region), coo_name, unhcr_region), by = "coo_name") %>%
+    filter(unhcr_region!="NA")
+   
+})
+
+output$plot <- renderPlot({
+  ggplot(approval_data(), aes(x = year, y = approved, fill = unhcr_region)) +
+    geom_bar(stat = "identity", position = "stack") +
+    labs(title = "Approved Asylum Decisions by UNHCR Region",
+         x = "Year", y = "Number of Approved Decisions") +
+    theme_unhcr() +
+     scale_y_continuous(labels = label_number()) +
+        theme(axis.text = element_text(size = 13),
+          axis.title = element_text(size=16))
+}) 
+
+
+```
+
+
+
+# Asylum Acceptance by Region
+```{r}
+plotOutput('plot')
+
+```
+
+
+## {.sidebar}
+```{r}
+  checkboxGroupInput("region", label = h3("Choose UNHCR Region"),
+                     choices = list("Asia and the Pacific" = "Asia and the Pacific",
+                                    "Europe" = "Europe",
+                                    "Southern Africa" = "Southern Africa",
+                                    "The Americas" = "The Americas",
+                                    "Middle East and North Africa" = "Middle East and North Africa",
+                                    "East and Horn of Africa" = "East and Horn of Africa",
+                                    "West and Central Africa" = "West and Central Africa"),
+                     selected = "Asia and the Pacific")
+
+
+```
+
+
+```{r}
+#| context: server
+
+
+demographics_data <- reactive({
+  filtered_data <- demographics %>%
+    rename(female = f_total) %>%
+    rename(male = m_total) %>%
+    select(coo_name, year, male, female, acc_type) %>%
+    filter(year %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022"))%>%
+    filter(coo_name %in% input$country) %>%
+    # mutate(year = factor(year)) %>%
+    filter(year %in% input$year) %>%
+    pivot_longer(cols = c("female", "male"),
+                 names_to = "gender",
+                 values_to = "total_applications") %>%
+    group_by(coo_name, gender,year) %>%
+   
+    summarise(total_applications = sum(total_applications, na.rm = TRUE))
+})
+
+output$plot_1 <- renderPlot({
+  req(demographics_data())
+  ggplot(demographics_data(), aes(x = gender, y = total_applications, fill = total_applications)) +
+    geom_bar(stat = "identity") +
+    # facet_wrap(~ acc_type) +
+    labs(title = "Asylum Applications by Gender",
+         x = "Gender", y = "Number of Applications") +
+    theme_unhcr()+
+    scale_y_continuous(labels = label_number()) +
+    scale_fill_continuous(labels = scales::comma_format()) +
+    theme(legend.key.height = unit(1, "cm"),  
+          legend.key.width = unit(4, "cm")) +
+    theme(axis.text = element_text(size = 14),
+          axis.title = element_text(size=16)) 
+})
+
+
+
+```
+
+
+# Asylum Acceptance Predictions
 
 ```{r}
 
 
 ```
 
-```{r}
-# demographics_data <- demographics %>%
-#    select(year, coo_name, f_total, m_total,acc_type) %>%
-#  mutate(year = factor(year)) %>%
-#    filter(year %in% c("2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022")) %>%
-#    pivot_longer(cols= c("f_total", "m_total"),
-#                 names_to="gender",
-#                 values_to ="total_applications") %>%
-#       group_by(coo_name,gender,acc_type) %>%
-#     summarise(total_applications = sum(total_applications, na.rm = TRUE)) # You might need to summarise the total
-# 
-# 
-# 
-#  ggplot(demographics_data, aes(x = gender, y= total_applications , fill = total_applications)) +
-# geom_bar(stat = "identity") +
-# facet_wrap(~ acc_type) +
-#    labs(title = "Application type by gender",
-#           x = "Year", y = "Number of Applications") +
-#      theme_unhcr() +
-#       scale_y_continuous(labels = label_number())
-
- 
-
-```
 
 
-
-
-```{r}
-
-```
-
-
-
-```{r}
-# 
-# #| context: server
-# #| include: false
-# 
-# # Data Wrangling
-# countries_2 <-  countries %>% rename(coo_name = name)
-#  approval <-  asylum_decisions %>%
-#       mutate(approved = dec_recognized + dec_other) %>%
-#       filter(year== c("2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022")) %>%
-#       left_join(countries_2, join_by(coo_name))
-# 
-# # Define UI
-# ui <- fluidPage(
-#   titlePanel("Asylum Decisions by UNHCR Region"),
-    
-#   sidebarLayout(
-#     sidebarPanel(
-#       checkboxGroupInput("regions", "Select UNHCR Regions:",
-#                          choices = unique(approval$unhcr_region),
-#                          selected = unique(approval$unhcr_region)[1])
-#     ),
-#     mainPanel(
-#       plotOutput("asylum_plot")
-#     )
-#   )
-# )
-# 
-# 
-# # Define server logic
-# server <- function(input, output) {
-#   filtered_data <- reactive({
-#     subset(approval, unhcr_region %in% input$regions)
-#   })
-#   
-#   # Render plot
-#   output$asylum_plot <- renderPlot({
-#     ggplot(filtered_data(), aes(x = year, y = approved, color = unhcr_region)) +
-#       geom_bar(stat="identity") +
-#       labs(title = "Asylum Decisions by UNHCR Region",
-#            x = "Year", y = "Number of Approved Decisions",
-#            color = "UNHCR Region") +
-#       theme_unhcr()
-#   })
-# }
-# 
-# # Run the application
-# shinyApp(ui = ui, server = server)
-
-
-
-
-```
-
-```{r}
-# 
-# #| context: server
-# #| include: false
-# 
-# # UI
-# ui <- fluidPage(
-#   titlePanel("Asylum Decisions Dashboard"),
-#   tabsetPanel(
-#     tabPanel("Plot", 
-#       sidebarLayout(
-#         sidebarPanel(
-#           checkboxGroupInput("unhcr_region", label = h3("Choose UNHCR Region"),
-#                              choices = list("Asia and the Pacific" = "Asia and the Pacific",
-#                                             "Europe" = "Europe",
-#                                             "Southern Africa" = "Southern Africa",
-#                                             "The Americas" = "The Americas",
-#                                             "Middle East and North Africa" = "Middle East and North Africa",
-#                                             "East and Horn of Africa" = "East and Horn of Africa",
-#                                             "West and Central Africa" = "West and Central Africa"),
-#                              selected = "Asia and the Pacific")
-#         ),
-#         mainPanel(
-#           plotOutput("asylum_plot")
-#         )
-#       )
-#     ),
-#     tabPanel("Summary",
-#       fluidRow(
-#         column(width = 6,
-#           h3("Summary Plot"),
-#           plotOutput("summary_plot")
-#         ),
-#         column(width = 6,
-#           h3("Summary Table"),
-#           tableOutput("summary_table")
-#         )
-#       )
-#     )
-#   )
-# )
-# 
-# # Server
-# server <- function(input, output) {
-#   # Data Wrangling
-#   countries_2 <- countries %>% rename(coo_name = name)
-#   
-#   approval <- asylum_decisions %>%
-#     mutate(approved = dec_recognized + dec_other) %>%
-#     filter(year == c("2013", "2014", "2015", "2016", "2017", "2018", "2019", "2020", "2021", "2022")) %>%
-#     left_join(countries_2, by = "coo_name")
-#   
-#   filtered_data <- reactive({
-#     subset(approval, unhcr_region %in% input$unhcr_region)
-#   })
-#   
-#   # Render plot
-#   output$asylum_plot <- renderPlot({
-#     ggplot(filtered_data(), aes(x = year, y = approved, color = unhcr_region)) +
-#       geom_bar(stat = "identity") +
-#       labs(title = "Asylum Decisions by UNHCR Region",
-#            x = "Year", y = "Number of Approved Decisions",
-#            color = "UNHCR Region") +
-#       theme_unhcr()
-#   })
-#   
-#   # Render summary plot
-#   output$summary_plot <- renderPlot({
-#     # Your code for summary plot
-#   })
-#   
-#   # Render summary table
-#   output$summary_table <- renderTable({
-#     # Your code for summary table
-#   })
-# }
-# 
-# # Run the application
-# shinyApp(ui = ui, server = server)
-
-
-
-```
 
 
 
