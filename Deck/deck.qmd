@@ -391,7 +391,7 @@ ggplot(filter_years, aes(x = year, fill = procedure_type_2)) +
 
 -   0.283
 -   Improved RMSE value since last run
--   Ideal parameters based on tuning- 3 predictors (mtry) and 28 data points in a node (min_n) 
+-   Ideal parameters based on tuning- 3 predictors (mtry) and 28 data points in a node (min_n)
 :::
 
 # THANK YOU! {background-color="#0072BC" background-opacity="0.3"}
