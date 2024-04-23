@@ -1,0 +1,70 @@
+---
+title: "Refugees"
+format: dashboard
+server: shiny
+---
+
+
+```{r}
+#| context: setup
+#| include: false
+
+library(tidyverse)
+library(refugees)
+library(shiny)
+library(ggplot2)
+```
+
+# Exploratory Data
+```{r}
+
+```
+
+# Demographics
+
+{.sidebar}
+
+```{r}
+# 
+# checkboxGroupInput("demographics", label=h3("Pick gender"),
+#                    choices=list("Creature"="Creature", "Human Mascot"="Human Mascot", "Inanimate"="Inanimate" ), selected="Creature")
+# 
+# sliderInput("years", "Minimum prediction years:", min=1, max=10, value=5)
+
+```
+## Column
+```{r}
+
+
+```
+
+# Asylum Application Acceptance Rates
+```{r}
+
+```
+## Column
+```{r}
+
+```
+## Column
+```{r}
+
+```
+
+
+```{r}
+sliderInput("bins", "Number of bins:", 
+            min = 1, max = 50, value = 30)
+plotOutput("distPlot")
+```
+
+```{r}
+# #| context: server
+# output$distPlot <- renderPlot({
+#    x <- faithful[, 2]  # Old Faithful Geyser data
+#    bins <- seq(min(x), max(x), length.out = input$bins + 1)
+#    hist(x, breaks = bins, col = 'darkgray', border = 'white',
+#         xlab = 'Waiting time to next eruption (in mins)',
+#         main = 'Histogram of waiting times')
+# })
+```
