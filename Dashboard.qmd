@@ -70,7 +70,7 @@ country_data <- refugees::population %>%
                           total_idps = sum(idps)) %>%
                 ungroup()
 
-country_data
+# country_data
 poly_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_polygons_simplified.json"
 line_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_lines_simplified.json"
 
@@ -356,15 +356,15 @@ demographics_data <- reactive({
 output$plot_1 <- renderPlot({
   req(demographics_data())
   ggplot(demographics_data(), aes(x = gender, y = total_applications, fill = total_applications)) +
-    geom_bar(stat = "identity") +
+    geom_bar(stat = "identity", show.legend= FALSE) +
     # facet_wrap(~ acc_type) +
     labs(title = "Asylum Applications by Gender",
          x = "Gender", y = "Number of Applications") +
     theme_unhcr()+
     scale_y_continuous(labels = label_number()) +
     scale_fill_continuous(labels = scales::comma_format()) +
-    theme(legend.key.height = unit(1, "cm"),  
-          legend.key.width = unit(5, "cm")) +
+    # theme(legend.key.height = unit(1, "cm"),  
+    #       legend.key.width = unit(5, "cm")) +
     theme(axis.text = element_text(size = 12),
           axis.title = element_text(size=16)) 
 })
@@ -481,7 +481,7 @@ output$plot_1 <- renderPlot({
     theme_unhcr()+
     scale_y_continuous(labels = label_number()) +
     scale_fill_continuous(labels = scales::comma_format()) +
-    theme(legend.key.height = unit(1, "cm"),  
+    theme(legend.key.height = unit(1, "cm"),
           legend.key.width = unit(4, "cm")) +
     theme(axis.text = element_text(size = 14),
           axis.title = element_text(size=16)) 
@@ -492,7 +492,7 @@ output$plot_1 <- renderPlot({
 ```
 
 
-# Asylum Acceptance Predictions
+<!-- # Asylum Acceptance Predictions -->
 
 ```{r}
 
