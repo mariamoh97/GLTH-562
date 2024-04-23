@@ -1,0 +1,58 @@
+"0","library(tidymodels)"
+"0","library(refugees)"
+"0","library(ggplot2)"
+"0","library(ggthemes)"
+"2","Warning: package ‘ggthemes’ was built under R version 4.3.3"
+"0","library(unhcrthemes)"
+"2","Warning: package ‘unhcrthemes’ was built under R version 4.3.3"
+"2","Lato font is missing, please install it!
+"
+"0","library(dplyr)"
+"0","library(tidyr)"
+"0","library(scales)"
+"0","library(tidyverse)"
+"0","library(sf)"
+"2","Linking to GEOS 3.11.2, GDAL 3.7.2, PROJ 9.3.0; sf_use_s2() is TRUE
+"
+"0","library(echarts4r)"
+"2","Warning: package ‘echarts4r’ was built under R version 4.3.3"
+"0","# library(ggiraph)"
+"0","library(widgetframe)"
+"2","Warning: package ‘widgetframe’ was built under R version 4.3.3"
+"2","Loading required package: htmlwidgets
+"
+"0","library(plotly)"
+"2","
+Attaching package: ‘plotly’
+
+"
+"2","The following object is masked from ‘package:ggplot2’:
+
+    last_plot
+
+"
+"2","The following object is masked from ‘package:stats’:
+
+    filter
+
+"
+"2","The following object is masked from ‘package:graphics’:
+
+    layout
+
+"
+"0","library(viridis)"
+"2","Loading required package: viridisLite
+"
+"2","
+Attaching package: ‘viridis’
+
+"
+"2","The following object is masked from ‘package:scales’:
+
+    viridis_pal
+
+"
+"0","library(DT)"
+"2","Warning: package ‘DT’ was built under R version 4.3.3"
+"0","library(gganimate)"

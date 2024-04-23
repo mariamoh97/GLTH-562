@@ -19,76 +19,24 @@ library(refugees)
 
 
 ```{r}
-  # rand_forest(mtry = 4, trees = 500, min_n = 1)
-# 
-# rf_mod <-
-#   rand_forest() %>% 
-#   set_engine("ranger") %>% 
-#   set_mode("regression")
-# rf_wf <-
-#   tree_wf %>% 
-#   update_model(rf_mod)
-# set.seed(100)
-# rf_wf %>% 
-#   fit_resamples(resamples = alz_folds) %>% 
-#   collect_metrics()
-# 
-# rf3_mod <- rf_mod %>% 
-#   set_args(mtry = 3) 
-# 
-# rf8_mod <- rf_mod %>% 
-#   set_args(mtry = 8) 
-# 
-# rf30_mod <- rf_mod %>% 
-#   set_args(mtry = 30) 
-# 
-# rf3_wf <- rf_wf %>% 
-#   update_model(rf3_mod)
-# set.seed(100)
-# rf3_wf %>% 
-#   fit_resamples(resamples = alz_folds) %>% 
-#   collect_metrics()
-# 
-# tree_wf <-
-#   workflow() %>% 
-#   add_formula(Class ~ .) %>% 
-#   add_model(tree_mod)
-# 
-# set.seed(100)
-# tree_wf %>% 
-#   fit_resamples(resamples = alz_folds) %>% 
-#   collect_metrics()
-# 
- asy_dec_model <- asylum_decisions %>%
+ 
+# creating data for training and testing
+  asy_dec_model <- asylum_decisions %>%
             filter(dec_recognized + dec_other + dec_rejected + dec_closed == dec_total) %>%
             mutate(acceptance_rate_pct = (dec_recognized + dec_other)/dec_total)
-#  
-#  rf_mod <- 
-#   rand_forest() %>% 
-#   set_engine("ranger") %>% 
-#   set_mode("classification")
-# rf_wf <-
-#   workflow() %>% 
-#   add_formula(Class ~ .) %>% 
-#   add_model(rf_mod)
-# 
-# set.seed(100) # Important!
-# rf_results <-
-#   rf_wf %>% 
-#   fit_resamples(resamples = alz_folds,
-#                 metrics = metric_set(roc_auc))
-# rf_results %>% 
-#   collect_metrics()
-# 
+
 
   set.seed(100) # Important!
 
   asylum_split  <- initial_split(asy_dec_model)
   asylum_train  <- training(asylum_split)
   asylum_test   <- testing(asylum_split)
+  
+  # CV data creation
   asylum_folds <- 
     vfold_cv(asylum_train, v = 10, strata = acceptance_rate_pct, breaks = 5)
 
+  # Initialising model and workflow
   rf_mod <-
     rand_forest() %>%
     set_engine("ranger") %>%
@@ -99,22 +47,19 @@ library(refugees)
     add_formula(acceptance_rate_pct ~ coo_iso + coa_iso + procedure_type + dec_level + dec_pc) %>% 
     add_model(rf_mod)
 
+  # Tuning for hyperparameters
   rf_tuner <-
     rand_forest(mtry = tune(),
                 min_n = tune()) %>%
     set_engine("ranger") %>%
     set_mode("regression")
   
-  # rf_wf <-
-  #   workflow() %>%
-  #   add_formula(acceptance_rate_pct ~ coo_iso + coa_iso + procedure_type + dec_level + dec_pc) %>%
-  #   add_model(tree_mod)
   
   rf_wf <-
     rf_wf %>%
     update_model(rf_tuner)
   
-  
+ # setting rmse method for training 
   set.seed(100) # Important!
   rf_results <-
     rf_wf %>%
@@ -124,32 +69,12 @@ library(refugees)
 rf_results %>%
   collect_metrics()
 
-# 
-# 
-# 
-# 
-#   forest_mod <- 
-#   rand_forest(mtry = 3,
-#               trees = 500,
-#               min_n = 4) %>% 
-#   set_engine(engine = "randomForest") %>% 
-#   set_mode("regression")
-#   forest_mod
-#   
-#   set.seed(100) # Important!
-# 
-#   asylum_split  <- initial_split(asy_dec)
-#   asylum_train  <- training(asylum_split)
-#   asylum_test   <- testing(asylum_split)
-#   
-#   rf_reg_fit <- forest_mod %>% 
-#                 fit(acceptance_rate_pct ~ coo_iso + coa_iso + procedure_type + dec_level + dec_pc, 
-#                                    data = asylum_train)
-#   rf_reg_fit
+
 ```
 
 
 ```{r}
+# evaluating best hyperparameters
 rf_results %>% 
   show_best(metric = "rmse", n = 5)
 
@@ -159,6 +84,8 @@ rf_results %>% autoplot()
 
 ```
 ```{r}
+
+# fit final model based on best hyperparameters
 asy_best <-
   rf_results %>% 
   select_best(metric = "rmse")
@@ -169,33 +96,20 @@ last_rf_workflow <-
 
 fitted_workflow <- fit(last_rf_workflow, data = asylum_train)
 
-fitted_workflow
+fitted_workflow %>% summary()
 
-# Predict on new data
-predictions <- predict(fitted_workflow, new_data = asylum_test)
-# last_rf_fit <-
-#   last_rf_workflow %>% 
-#   last_fit(split = asylum_split)
 
-# last_rf_fit
 ```
 
+
+
 ```{r}
+predictions <- predict(fitted_workflow, new_data = asylum_test)
 predictions
 ```
 
 ```{r}
-last_rf_fit %>% 
-  collect_metrics()
-
+# saving model
+saveRDS(fitted_workflow, file = "pred_asylum.rds")
 ```
 
-```{r}
-last_rf_fit %>% 
-  collect_predictions()
-
-```
-
-```{r}
-  predict(rf_wf, asylum_test)
-```
