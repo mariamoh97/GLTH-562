@@ -38,7 +38,7 @@ library(gganimate)
 
 # Exploring the Data {background-color="#0072BC" background-size="contain" background-opacity="0.3"}
 
-## 2022 has been one of the worst years {background-color="#EF4A60"}
+## 2022 has been one of the worst years {background-color="##FFBCC1"}
 
 ::: incremental
 -   In 2022, millions were forcibly displaced by persecution, conflict, violence, human rights violations and events seriously disturbing public order
@@ -50,15 +50,15 @@ library(gganimate)
 -   Almost 90 per cent of them in low- and middle-income countries
 :::
 
-## Top 10 Countries of Origin for Refugees {background-color="#EF4A60"}
+## Top 10 Countries of Origin for Refugees {background-color="##FFBCC1"}
 
 ```{r}
 
-ref_coo_10 <- refugees::population |>
-  filter(year == 2022) |>
+ref_coo_10 <- refugees::population %>%
+  filter(year == 2022) %>%
   summarise(refugees = sum(refugees, na.rm = TRUE) + sum(oip, na.rm = TRUE),
-            .by = coo_name) |>
-  slice_max(order_by = refugees, n = 10) |>
+            .by = coo_name) %>%
+  slice_max(order_by = refugees, n = 10) %>%
   ggplot(aes(refugees, reorder(coo_name, refugees))) +
   geom_col(fill = unhcr_pal(n = 1, "pal_blue"),
            width = 0.7) +
@@ -74,28 +74,29 @@ ref_coo_10 <- refugees::population |>
               axis_title = FALSE,
               axis_text = "y")
 
+
 ref_coo_10
                                         
 
 ```
 
-## Important Definitions {.smaller background-color="#EF4A60"}
+## Important Definitions {.smaller background-color="#FFBCC1"}
 
 ::: columns
-::: {.column width="25%"}
+::: {.column width="20%"}
 **Refugees** include individuals granted complementary forms of protection, and those enjoying temporary protection.
 :::
 
-::: {.column width="25%"}
+::: {.column width="20%"}
 **Asylum-seekers** are individuals who have sought international protection and whose claims for refugee status have not yet been determined.
 :::
 
-::: {.column width="25%"}
+::: {.column width="30%"}
 **Other people in need of international protection** refers to people who are outside their country or territory of origin, typically because they have been forcibly displaced across international borders, who have not been reported under other categories but who likely need international protection.
 :::
 
-::: {.column width="25%"}
-**Internally displaced persons** are persons who have been forced or obliged to flee or to leave their homes , in particular as a result of, or in order to avoid the effects of armed conflict, situations of generalized violence, violations of human rights or natural or human-made disasters, and who have not crossed an internationally recognized State border.
+::: {.column width="30%"}
+**Internally displaced persons** are persons who have been forced to flee their homes , in particular as a result of, or in order to avoid the effects of armed conflict, situations of generalized violence, violations of human rights or natural or human-made disasters, and who have not crossed an internationally recognized State border.
 :::
 :::
 
@@ -104,28 +105,30 @@ ref_coo_10
 ```{r}
 # Global forcibly displaced population during last ten years
 
-fd_last_ten_years <- refugees::population |>
-  filter(year >= 2012 & year <= 2022) |>
+
+fd_last_ten_years <- refugees::population %>%
+  filter(year >= 2012 & year <= 2022) %>%
   summarise(refugees = sum(refugees, na.rm = TRUE),
             asylum_seekers = sum(asylum_seekers, na.rm = TRUE), 
-            oip = sum(oip, na.rm = TRUE), .by = year) |>
-  left_join(refugees::idmc |> 
-              filter(year >= 2012 & year <= 2022) |>
-              summarise(idmc = sum(total, na.rm = TRUE), .by = year), by=c("year")) |>
-  left_join(refugees::unrwa |> 
-              filter(year >= 2012 & year <= 2022) |>
-              summarise(unrwa = sum(total, na.rm = TRUE), .by = year), by=c("year")) |>
-  pivot_longer(cols = -year, names_to = "population_type", values_to = "total") |> 
+            oip = sum(oip, na.rm = TRUE), .by = year) %>%
+  left_join(refugees::idmc %>%
+              filter(year >= 2012 & year <= 2022) %>%
+              summarise(idmc = sum(total, na.rm = TRUE), .by = year), by=c("year")) %>%
+  left_join(refugees::unrwa %>%
+              filter(year >= 2012 & year <= 2022) %>%
+              summarise(unrwa = sum(total, na.rm = TRUE), .by = year), by=c("year")) %>%
+  pivot_longer(cols = -year, names_to = "population_type", values_to = "total") %>% 
   mutate(population_type=factor(population_type, levels=c("oip", "unrwa","asylum_seekers", "refugees","idmc")), 
              population_type=recode(population_type,
              refugees="Refugees under UNHCR’s mandate",
              asylum_seekers="Asylum-seekers",
              oip="Other people in need of international protection",
              idmc="Internally displaced persons",
-             unrwa="Palestine refugees under UNRWA’s mandate")) |>
-  arrange(year, population_type) |>
+             unrwa="Palestine refugees under UNRWA’s mandate")) %>%
+  arrange(year, population_type) %>%
   ggplot() +
   geom_area(aes(x = year, y = total, fill = population_type)) +
+  # geom_text(aes(x = 2022, y = cumsum(total)-150000, label = population_type), check_overlap = TRUE) +
   scale_fill_unhcr_d(palette = "pal_unhcr") +
   labs(y = "Number of people", caption = "Source: UNHCR Refugee Data Finder") +
   scale_x_continuous(breaks = pretty_breaks(n = 10)) +
@@ -137,23 +140,17 @@ fd_last_ten_years <- refugees::population |>
     scale_fill_manual(values = c("#EF4A60", "#8EBEFF", "#18375F","#0072BC", "#00B398")) +
 guides(fill = guide_legend(nrow = 3, byrow = TRUE, reverse = TRUE)) 
   
+
+# final_last_ten_years <- ggplotly(fd_last_ten_years, tooltip="fill")
 fd_last_ten_years
+# final_last_ten_years
                                         
                                         
 ```
 
-```{r}
-# Loading required packages
-
-
-
-
-```
-
-## Which Nations Do Displaced People Belong To? {.smaller background-color="#EF4A60"}
+## Which Nations Do Displaced People Belong To? {.smaller background-color="#FFBCC1"}
 
 ```{r}
-
 
 # Load data
 
@@ -170,100 +167,40 @@ poly_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/
 line_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_lines_simplified.json"
 
 # Add CRS to poly and join values from csv
-poly_refugees <- read_sf(poly_url) |> 
-  st_set_crs(4326) |> 
-  left_join(country_data, by = c("color_code" = "coo_iso")) |> 
+poly_refugees <- read_sf(poly_url) %>% 
+  st_set_crs(4326) %>% 
+  left_join(country_data, by = c("color_code" = "coo_iso")) %>% 
   mutate(legend = case_when(
     total_refugees < 1e4 ~ "<10k",
     total_refugees < 1e5 ~ "10k-100k",
     total_refugees < 1e6 ~ "100k-1M",
     is.na(total_refugees) ~ NA_character_,
     TRUE ~ ">1M"
-  )) |> 
-  mutate(legend = as_factor(legend) |> 
+  )) %>% 
+  mutate(legend = as_factor(legend) %>% 
            fct_relevel("<10k", "10k-100k", "100k-1M", ">1M"))
 
-poly_idps <- read_sf(poly_url) |> 
-  st_set_crs(4326) |> 
-  left_join(country_data, by = c("color_code" = "coo_iso")) |> 
+poly_idps <- read_sf(poly_url) %>% 
+  st_set_crs(4326) %>% 
+  left_join(country_data, by = c("color_code" = "coo_iso")) %>% 
   mutate(legend = case_when(
     total_idps < 1e4 ~ "<10k",
     total_idps < 1e5 ~ "10k-100k",
     total_idps < 1e6 ~ "100k-1M",
     is.na(total_idps) ~ NA_character_,
     TRUE ~ ">1M"
-  )) |> 
-  mutate(legend = as_factor(legend) |> 
+  )) %>% 
+  mutate(legend = as_factor(legend) %>% 
            fct_relevel("<10k", "10k-100k", "100k-1M", ">1M"))
   
 
 # Sort line type
-line <- read_sf(line_url) |>
+line <- read_sf(line_url) %>%
   mutate(
-    type = as_factor(type) |>
+    type = as_factor(type) %>%
       fct_relevel("solid", "dashed", "dotted", "dashed-dot")
-  ) |> 
+  ) %>% 
   st_set_crs(4326)
-
-# # Data URL
-# df_url <- read_csv("https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/bubble_map.csv")
-# 
-# country_data <- refugees::population %>%
-#                 filter(year >= 2012 & year <= 2022) %>%
-#                 group_by(coo_name, coo_iso) %>%
-#                 summarise(total_refugees = sum(refugees),
-#                           total_asylum = sum(asylum_seekers),
-#                           total_idps = sum(idps)) %>%
-#                 ungroup()
-# # country_data
-# loc_data <- country_data %>%
-#             left_join(df_url, c("coo_iso" = "iso3")) %>%
-#             select(-gis_name, -ref)
-# 
-# top10_refugees <- loc_data %>%
-#                   arrange(desc(total_refugees)) %>%
-#                   drop_na(lon)
-# # print(head(top10_refugees, 10))
-# 
-# top10_asylum <- loc_data %>% 
-#                 arrange(desc(total_asylum)) %>%
-#                 drop_na(lon)
-# # print(head(top10_asylum, 10))
-# 
-# top10_idps <- loc_data %>%
-#               arrange(desc(total_idps)) %>%
-#               drop_na(lon)
-# # print(head(top10_idps, 10))
-#             
-# 
-# poly_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_polygons_simplified.json"
-# line_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_lines_simplified.json"
-# 
-# # Read and transform data for refugees
-# df_ref <- top10_refugees %>% 
-#   st_as_sf(coords = c("lon", "lat"),
-#            crs = 4326)
-# 
-# poly <- read_sf(poly_url) %>%
-#   st_set_crs(4326)
-# 
-# line <- read_sf(line_url) %>%
-#   mutate(
-#     type = as_factor(type) %>%
-#       fct_relevel("solid", "dashed", "dotted", "dashed-dot")
-#   ) %>%
-#   st_set_crs(4326)
-# 
-# # Read and transform data for asylum seekers
-# df_asy <- top10_asylum %>% 
-#   st_as_sf(coords = c("lon", "lat"),
-#            crs = 4326)
-# 
-# # Read and transform data for internally displaced persons
-# df_idp <- top10_idps %>% 
-#   st_as_sf(coords = c("lon", "lat"),
-#            crs = 4326)
-
 
 
 ```
@@ -272,7 +209,6 @@ line <- read_sf(line_url) |>
 ### Refugees
 
 ```{r}
-
 
 # Plot
 ggplot() +
@@ -288,76 +224,13 @@ ggplot() +
            expand = FALSE) +
   scale_linetype_manual(values = c(1, 2, 3, 4)) +
   scale_fill_unhcr_d(palette = "pal_blue") +
-  # labs(
-  #   title = "Global refugee displacement by country of asylum | 2021",
-  #   caption = "The boundaries and names shown and the designations used on this map do not imply official\nendorsement or acceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
-  # ) +
   theme_unhcr(void = TRUE)
-# ggplot() +
-#   geom_sf(data = poly,
-#           fill = unhcr_pal(n = 5, "pal_grey")[2],
-#           color = "transparent") +
-#   geom_sf(data = line,
-#           aes(linetype = type),
-#           color = "white",
-#           linewidth = .25,
-#           show.legend = FALSE) +
-#   geom_sf(data = df_ref,
-#           aes(size = total_refugees),
-#           shape = 21,
-#           fill = unhcr_pal(n = 1, "pal_blue"),
-#           color = unhcr_pal(n = 5, "pal_blue")[5],
-#           alpha = 0.3) +
-#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
-#   scale_size_area(max_size = 12,
-#                   labels = scales::label_number(
-#                     scale_cut = cut_short_scale()
-#                   ),
-#                   breaks = c(1e5, 1e6, 5e6)) +
-#   # labs(
-#   #   title = "Global refugee displacement by country of origin | Last Decade",
-#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official endorsement or\nacceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
-#   # ) +
-#   coord_sf(crs = st_crs('ESRI:54030')) +
-#   theme_unhcr(void = TRUE)
-```
 
-```{r}
-### Asylum Seekers
-# ggplot() +
-#   geom_sf(data = poly,
-#           fill = unhcr_pal(n = 5, "pal_grey")[2],
-#           color = "transparent") +
-#   geom_sf(data = line,
-#           aes(linetype = type),
-#           color = "white",
-#           linewidth = .25,
-#           show.legend = FALSE) +
-#   geom_sf(data = df_asy,
-#           aes(size = total_asylum),
-#           shape = 21,
-#           fill = unhcr_pal(n = 1, "pal_blue"),
-#           color = unhcr_pal(n = 5, "pal_blue")[5],
-#           alpha = 0.3) +
-#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
-#   scale_size_area(max_size = 12,
-#                   labels = scales::label_number(
-#                     scale_cut = cut_short_scale()
-#                   ),
-#                   breaks = c(1e5, 1e6, 5e6)) +
-#   # labs(
-#   #   title = "Global refugee displacement by country of origin | Last Decade",
-#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official endorsement or\nacceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
-#   # ) +
-#   coord_sf(crs = st_crs('ESRI:54030')) +
-#   theme_unhcr(void = TRUE)
 ```
 
 ### Internally Displaced Persons
 
 ```{r}
-
-
 
 # Plot
 ggplot() +
@@ -373,43 +246,12 @@ ggplot() +
            expand = FALSE) +
   scale_linetype_manual(values = c(1, 2, 3, 4)) +
   scale_fill_unhcr_d(palette = "pal_blue") +
-  # labs(
-  #   title = "Global refugee displacement by country of asylum | 2021",
-  #   caption = "The boundaries and names shown and the designations used on this map do not imply official\nendorsement or acceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
-  # ) +
   theme_unhcr(void = TRUE)
-# 
-# ggplot() +
-#   geom_sf(data = poly,
-#           fill = unhcr_pal(n = 5, "pal_grey")[2],
-#           color = "transparent") +
-#   geom_sf(data = line,
-#           aes(linetype = type),
-#           color = "white",
-#           linewidth = .25,
-#           show.legend = FALSE) +
-#   geom_sf(data = df_idp,
-#           aes(size = total_idps),
-#           shape = 21,
-#           fill = unhcr_pal(n = 1, "pal_blue"),
-#           color = unhcr_pal(n = 5, "pal_blue")[5],
-#           alpha = 0.3) +
-#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
-#   scale_size_area(max_size = 12,
-#                   labels = scales::label_number(
-#                     scale_cut = cut_short_scale()
-#                   ),
-#                   breaks = c(1e5, 1e6, 5e6)) +
-#   # labs(
-#   #   title = "Global refugee displacement by country of origin | Last Decade",
-#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official endorsement or\nacceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
-#   # ) +
-#   coord_sf(crs = st_crs('ESRI:54030')) +
-#   theme_unhcr(void = TRUE)
+
 ```
 :::
 
-## Refugee Population Across UNHCR Regions {background-color="#EF4A60"}
+## Refugee Population Across UNHCR Regions {background-color="#FFBCC1"}
 
 ```{r}
 df <- read_csv("https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/correlation/heatmap.csv")
@@ -462,85 +304,9 @@ ggplot(
 
 ```
 
-```{r}
-
-## Where Do Displaced People Seek Asylum?
-# # Data URL
-# df_url <- read_csv("https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/bubble_map.csv")
-# 
-# # print(refugees::flows %>% filter(year >= 2012 & year <=2022))
-# app_country_data <- refugees::flows %>%
-#                 filter(year >= 2012 & year <= 2022) %>%
-#                 group_by(coa_name, coa_iso) %>%
-#                 summarise(app_total_asylum = sum(asylum_seekers)) %>%
-#                 ungroup()
-# 
-# # print(app_country_data)
-# 
-# # country_data
-# app_loc_data <- app_country_data %>%
-#             left_join(df_url, c("coa_iso" = "iso3")) %>%
-#             select(-gis_name, -ref)
-# 
-# 
-# app_top10_asylum <- app_loc_data %>% 
-#                 arrange(desc(app_total_asylum)) %>%
-#                 drop_na(lon)
-#             
-# 
-# poly_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_polygons_simplified.json"
-# line_url <- "https://raw.githubusercontent.com/GDS-ODSSS/unhcr-dataviz-platform/master/data/geospatial/world_lines_simplified.json"
-# 
-# 
-# 
-# app_poly <- read_sf(poly_url) %>%
-#   st_set_crs(4326)
-# 
-# app_line <- read_sf(line_url) %>%
-#   mutate(
-#     type = as_factor(type) %>%
-#       fct_relevel("solid", "dashed", "dotted", "dashed-dot")
-#   ) %>%
-#   st_set_crs(4326)
-# 
-# # Read and transform data for asylum seekers
-# app_df_asy <- app_top10_asylum %>% 
-#   st_as_sf(coords = c("lon", "lat"),
-#            crs = 4326)
-# 
-# ggplot() +
-#   geom_sf(data = app_poly,
-#           fill = unhcr_pal(n = 5, "pal_grey")[2],
-#           color = "transparent") +
-#   geom_sf(data = app_line,
-#           aes(linetype = type),
-#           color = "white",
-#           linewidth = .25,
-#           show.legend = FALSE) +
-#   geom_sf(data = app_df_asy,
-#           aes(size = app_total_asylum),
-#           shape = 21,
-#           fill = unhcr_pal(n = 1, "pal_blue"),
-#           color = unhcr_pal(n = 5, "pal_blue")[5],
-#           alpha = 0.3) +
-#   scale_linetype_manual(values = c(1, 2, 3, 4)) +
-#   scale_size_area(max_size = 12,
-#                   labels = scales::label_number(
-#                     scale_cut = cut_short_scale()
-#                   ),
-#                   breaks = c(1e5, 1e6, 5e6)) +
-#   # labs(
-#   #   title = "Global refugee displacement by country of origin | Last Decade",
-#   #   caption = "The boundaries and names shown and the designations used on this map do not imply official endorsement or\nacceptance by the United Nations.\nSource: UNHCR Refugee Data Finder\n© UNHCR, The UN Refugee Agency"
-#   # ) +
-#   coord_sf(crs = st_crs('ESRI:54030')) +
-#   theme_unhcr(void = TRUE)
-
-```
-
 # Applications {background-color="#0072BC" background-opacity="0.3"}
 
-## Which Countries Accept Most Asylum Applications {background-color="#EF4A60"}
+## Which Countries Accept Most Asylum Applications {background-color="#FFBCC1"}
 
 ```{r}
 asy_dec <- asylum_decisions %>%
@@ -586,7 +352,7 @@ app_map
 
 ```
 
-## Most Common Types of Applications {background-color="#EF4A60"}
+## Most Common Types of Applications {background-color="#FFBCC1"}
 
 ```{r}
 
@@ -612,10 +378,9 @@ ggplot(filter_years, aes(x = year, fill = procedure_type_2)) +
 
 # Predicting Acceptance Rates {background-color="#0072BC" background-opacity="0.3"}
 
-## Model Used and Design- Dependent and Independent Vars {background-color="#EF4A60"}
+## Model Used and Design- Dependent and Independent Vars {background-color="#FFBCC1"}
 
 ::: panel-tabset
-
 ### Random Forest Model
 
 -   Dependent Variable: Acceptance Rate
@@ -623,11 +388,10 @@ ggplot(filter_years, aes(x = year, fill = procedure_type_2)) +
 -   Random forest because of categorical input
 
 ### RMSE Value
-- 28.1370495
-- Too high for useful predictions
-- Model requires better data cleaning
 
+-   28.1370495
+-   Too high for useful predictions
+-   Model requires better data cleaning
 :::
-
 
 # THANK YOU! {background-color="#0072BC" background-opacity="0.3"}

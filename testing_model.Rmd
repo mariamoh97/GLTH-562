@@ -83,7 +83,7 @@ library(refugees)
 
   set.seed(100) # Important!
 
-  asylum_split  <- initial_split(asy_dec)
+  asylum_split  <- initial_split(asy_dec_model)
   asylum_train  <- training(asylum_split)
   asylum_test   <- testing(asylum_split)
   asylum_folds <- 
@@ -93,6 +93,7 @@ library(refugees)
     rand_forest() %>%
     set_engine("ranger") %>%
     set_mode("regression")
+  
   rf_wf <-
     workflow() %>% 
     add_formula(acceptance_rate_pct ~ coo_iso + coa_iso + procedure_type + dec_level + dec_pc) %>% 
@@ -112,6 +113,8 @@ library(refugees)
   rf_wf <-
     rf_wf %>%
     update_model(rf_tuner)
+  
+  
   set.seed(100) # Important!
   rf_results <-
     rf_wf %>%
@@ -159,12 +162,27 @@ rf_results %>% autoplot()
 asy_best <-
   rf_results %>% 
   select_best(metric = "rmse")
+
 last_rf_workflow <- 
-  rf_wf%>%
-  finalize_workflow(asy_best) 
-last_rf_fit <-
-  last_rf_workflow %>% 
-  last_fit(split = asylum_split)
+  rf_wf %>%
+  finalize_workflow(asy_best)
+
+fitted_workflow <- fit(last_rf_workflow, data = asylum_train)
+
+# Predict on new data
+predictions <- predict(fitted_workflow, new_data = asylum_test)
+# last_rf_fit <-
+#   last_rf_workflow %>% 
+#   last_fit(split = asylum_split)
+
+# last_rf_fit
+```
+
+```{r}
+predictions
+```
+
+```{r}
 last_rf_fit %>% 
   collect_metrics()
 
@@ -176,3 +194,6 @@ last_rf_fit %>%
 
 ```
 
+```{r}
+  predict(rf_wf, asylum_test)
+```
