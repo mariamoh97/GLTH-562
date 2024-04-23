@@ -87,8 +87,12 @@ Independent Variables: ISO Codes for Countries of Origin and Asylum, Procedure T
 3. Most internally displaced persons belong to African countries and may not necessarily be looking at asylum applications
 
 ![Top 10 Countries of Origin for Internally Displaced Persons from 2012-2022](data/country_of_origin_idpjpg.jpg)
+**Prediction Model**
+
 4. The given dataset can help in training a robust model which can predict one's chances of asylum acceptance, given their country of origin, where they are applying, who they are submitting the application to, and whether they are applying individually or as a case group. However, a robust model requires more explanatory data and more data cleaning than was done for our base model. At the same time, this model can be used as a foundation to improve upon and build a stronger predictor analysis. 
 
 ![Ideal Parameters for Random Forest Model with Tuning](data/model_parameters.png)
 
 
+
+*NOTE*- The folder, **Dashboard_files** contains the main **dashboard.qmd** file that is our main deliverable.

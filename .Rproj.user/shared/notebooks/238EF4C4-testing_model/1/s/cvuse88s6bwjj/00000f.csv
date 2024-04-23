@@ -1,3 +1,0 @@
-"0","# last_rf_fit %>% "
-"0","#   collect_metrics()"
-"0","saveRDS(fitted_workflow, file = ""data/pred_asylum.rds"")"
