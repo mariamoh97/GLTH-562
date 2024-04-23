@@ -352,7 +352,9 @@ app_map
 
 ```
 
+
 ## Most Common Types of Applications {background-color="#FFBCC1"}
+
 
 ```{r}
 
@@ -386,6 +388,7 @@ ggplot(filter_years, aes(x = year, fill = procedure_type_2)) +
 -   Dependent Variable: Acceptance Rate
 -   Independent Variables: ISO Codes for Countries of Origin and Asylum, Procedure Type, Decision Level, Applicant Type
 -   Random forest because of categorical input
+
 
 ### RMSE Value
 
