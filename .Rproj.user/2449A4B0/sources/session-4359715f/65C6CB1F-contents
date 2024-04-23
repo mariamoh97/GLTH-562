@@ -389,9 +389,9 @@ ggplot(filter_years, aes(x = year, fill = procedure_type_2)) +
 
 ### RMSE Value
 
--   0.283
--   Improved RMSE value since last run
--   Ideal parameters based on tuning- 3 predictors (mtry) and 28 data points in a node (min_n) 
+-   28.1370495
+-   Too high for useful predictions
+-   Model requires better data cleaning
 :::
 
 # THANK YOU! {background-color="#0072BC" background-opacity="0.3"}

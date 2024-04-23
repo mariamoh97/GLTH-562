@@ -1,0 +1,8 @@
+"0","  predict(rf_wf, asylum_test)"
+"1","[1m[33mError[39m in `predict()`:[22m
+[33m![39m Can't predict on an untrained workflow.
+[34mℹ[39m Do you need to call `fit()`?
+Backtrace:
+[90m 1. [39m[1mstats[22m::predict(rf_wf, asylum_test)
+[90m 2. [39m[1m[94mworkflows:::predict.workflow([39m[22mrf_wf, asylum_test[1m[94m)[39m[22m
+"
