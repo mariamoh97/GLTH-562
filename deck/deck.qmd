@@ -38,7 +38,7 @@ library(gganimate)
 
 # Exploring the Data {background-color="#0072BC" background-size="contain" background-opacity="0.3"}
 
-## 2022 has been one of the worst years {background-color="##FFBCC1"}
+## 2022 has been one of the worst years {background-color="#FFBCC1"}
 
 ::: incremental
 -   In 2022, millions were forcibly displaced by persecution, conflict, violence, human rights violations and events seriously disturbing public order
@@ -50,7 +50,7 @@ library(gganimate)
 -   Almost 90 per cent of them in low- and middle-income countries
 :::
 
-## Top 10 Countries of Origin for Refugees {background-color="##FFBCC1"}
+## Top 10 Countries of Origin for Refugees {background-color="#FFBCC1"}
 
 ```{r}
 
@@ -100,7 +100,7 @@ ref_coo_10
 :::
 :::
 
-## In the last decade, 62.2 million refugees were added {background-color="#EF4A60"}
+## In the last decade, 62.2 million refugees were added {background-color="#FFBCC1"}
 
 ```{r}
 # Global forcibly displaced population during last ten years
